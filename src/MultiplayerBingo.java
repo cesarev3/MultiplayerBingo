@@ -25,7 +25,7 @@ public class MultiplayerBingo {
                 roundsOfDrawing, numberOfPlayers, autoManualCardGeneratorMode,
                 autoManualDrawingMode, numberOfWinners, forIndex};
 
-        int[][] bingoCards = new int[numberOfPlayers][tensPerCard];
+        int[][] bingoCards;
 
         // seleciona o tipo de Cartela ou sair do jogo
         String cardString = "Cartela Automática";
@@ -46,9 +46,9 @@ public class MultiplayerBingo {
         // Arrays fora do While para poderem ser utilizadas no relatório final
         String[] playersRank = new String[numberOfPlayers];
         int[] numberOfMatchesFromPlayer = new int[numberOfPlayers];
-        int[][] bingoCardsChecked = new int[numberOfPlayers][tensPerCard];
+        int[][] bingoCardsChecked;
         int[] mapOfDrawingTens = new int[tensUpperLimit];
-        int[] lastRoundMapOfTens = new int[tensUpperLimit];
+        int[] lastRoundMapOfTens;
         int[] containerOfTensToDrawing = loadContainerOfTensToDrawing(control);
 
         // inicia o módulo de sorteio de dezenas a cada rodada
@@ -181,7 +181,7 @@ public class MultiplayerBingo {
     public static int[][] splitToTens(String[] inputTensString, int[] control) {
         int maxLines = inputTensString.length;
         int tensPerCard = control[1];
-        String[] scratchArea = new String[tensPerCard];
+        String[] scratchArea;
         int[][] outputTensSplited = new int[maxLines][tensPerCard];
 
         try {
@@ -208,7 +208,7 @@ public class MultiplayerBingo {
     public static int autoManualSelect() {
         Scanner readScanner = new Scanner(System.in);
 
-        int control = 0;
+        int control;
         while (true) {
             char inputChar = Character.toUpperCase(readScanner.next().charAt(0));
             if (inputChar == 'A') {
@@ -251,7 +251,6 @@ public class MultiplayerBingo {
 
         int tensUpperLimit = control[0];
         int tensPerCard = control[1];
-        int tensPerDrawing = control[2];
 
         int[] inputContainerOfTens = loadContainerOfTensToCards(control);
         int[] outputRandomTens = new int[tensPerCard];
@@ -285,14 +284,12 @@ public class MultiplayerBingo {
 
         int numberOfPlayers = control[4];
         int tensPerCard = control[1];
-        int[] inputTensSet = new int[numberOfPlayers];
+        int[] inputTensSet;
         int[][] outputBingoCard = new int[numberOfPlayers][tensPerCard];
 
         for (int i = 0; i < numberOfPlayers; i++) {
             inputTensSet = autoGenerateRandomTensToCards(control);
-            for (int j = 0; j < tensPerCard; j++) {
-                outputBingoCard[i][j] = inputTensSet[j];
-            }
+            System.arraycopy(inputTensSet, 0, outputBingoCard[i], 0, tensPerCard);
         }
         return outputBingoCard;
     }
@@ -356,7 +353,8 @@ public class MultiplayerBingo {
         int[] cacheArray = new int[tensPerDrawing];
         int[] outputAutoDrawingTens = new int[tensUpperLimit];
 
-        System.arraycopy(inputMapOfDrawingTens, 0, outputAutoDrawingTens, 0, tensUpperLimit);
+        System.arraycopy(inputMapOfDrawingTens, 0,
+                outputAutoDrawingTens, 0, tensUpperLimit);
 
         for (int i = 0; i < tensPerDrawing; i++) {
             while (true) {
@@ -369,9 +367,8 @@ public class MultiplayerBingo {
             }
         }
         Arrays.sort(cacheArray);
-        for (int i = 0; i < tensPerDrawing; i++) {
-            outputAutoDrawingTens[i + lowLimit] = cacheArray[i];
-        }
+        System.arraycopy(cacheArray, 0,
+                outputAutoDrawingTens, lowLimit, tensPerDrawing);
         return outputAutoDrawingTens;
     }
 
@@ -466,8 +463,7 @@ public class MultiplayerBingo {
     public static void printTop3Players(String[] rankingOfPlayers, int[] control) {
         int numberOfPlayers = control[4];
         System.out.print("*** Top 3 = ");
-        int highLimit = 3;
-        if (numberOfPlayers < 3) highLimit = numberOfPlayers;
+        int highLimit = Math.min(numberOfPlayers, 3);
         for (int i = 0; i < highLimit; i++) {
             System.out.printf("%s, ", rankingOfPlayers[i]);
         }
@@ -551,7 +547,8 @@ public class MultiplayerBingo {
         }
 
         for (int i = 0; i < numberOfWinners; i++) {
-            System.arraycopy(bingoCards[cardIndex[i]], 0, winnersCard[i], 0, tensPerCard);
+            System.arraycopy(bingoCards[cardIndex[i]], 0,
+                    winnersCard[i], 0, tensPerCard);
             Arrays.sort(winnersCard[i]);
         }
         return winnersCard;
@@ -659,15 +656,23 @@ public class MultiplayerBingo {
     }
 
     public enum EntryMessages {
-        GETNAMES("\nDigite o primeiro nome de todos na mesma linha" +
-                " e use '-' entre eles\nEx. Ana-Carlos-Marcola-Paula\n> "),
-        GETTENS("\nDigite cada dezena separada por ',' e use '-' " +
-                "para separar as cartelas\nEx. \"1,2,3,4,5-2,3,4,5,6-3,4," +
-                "5,6,7\"\n> "),
-        GETDRAWING("\nDigite as dezenas do sorteio separadas por ',' " +
-                "ou 'X' para sair do jogo.\nEx. \"1,20,13,45,5\n> ");
+        GETNAMES("""
 
-        String userMessage;
+                Digite o primeiro nome de todos na mesma linha e use '-' entre eles
+                Ex. Ana-Carlos-Marcola-Paula
+                >\s"""),
+        GETTENS("""
+
+                Digite cada dezena separada por ',' e use '-' para separar as cartelas
+                Ex. "1,2,3,4,5-2,3,4,5,6-3,4,5,6,7"
+                >\s"""),
+        GETDRAWING("""
+
+                Digite as dezenas do sorteio separadas por ',' ou 'X' para sair do jogo.
+                Ex. "1,20,13,45,5
+                >\s""");
+
+        final String userMessage;
 
         EntryMessages(String s) {
             this.userMessage = s;
